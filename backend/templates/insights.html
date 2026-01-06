@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}BP Guardian | Insights{% endblock %}
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h4 mb-0">Insights</h2>
+  <button class="btn btn-primary btn-sm" id="btnRefreshInsights" type="button">Refresh</button>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h3 class="h6 mb-2">Mood vs Blood Pressure (daily)</h3>
+        <div class="chart-wrap">
+          <canvas id="insightsChart"></canvas>
+        </div>
+        <div class="text-muted small mt-2" id="insightsText">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h3 class="h6 mb-2">Recommendation Summary</h3>
+        <div id="insRecoSummary" class="text-muted">—</div>
+        <ul id="insRecoList" class="mb-0"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/insights.js"></script>
+{% endblock %}

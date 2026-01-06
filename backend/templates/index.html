@@ -1,0 +1,417 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>BP Guardian – Simple Frontend</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #2563eb;
+      color: white;
+      padding: 1rem 2rem;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.4rem;
+    }
+    main {
+      padding: 1rem 2rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: white;
+      border-radius: 0.75rem;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+    label {
+      display: block;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+      margin-bottom: 0.2rem;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 0.4rem 0.5rem;
+      border-radius: 0.4rem;
+      border: 1px solid #d4d4d4;
+      font-size: 0.9rem;
+    }
+    button {
+      margin-top: 0.6rem;
+      padding: 0.4rem 0.8rem;
+      border-radius: 0.5rem;
+      border: none;
+      background: #2563eb;
+      color: white;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+    button:disabled {
+      background: #9ca3af;
+      cursor: not-allowed;
+    }
+    .small {
+      font-size: 0.8rem;
+      color: #4b5563;
+    }
+    #status {
+      padding: 0.5rem 2rem;
+      font-size: 0.9rem;
+      background: #e5f2ff;
+      border-top: 1px solid #bfdbfe;
+      border-bottom: 1px solid #bfdbfe;
+    }
+    pre {
+      background: #111827;
+      color: #e5e7eb;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.8rem;
+      max-height: 260px;
+      overflow: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BP Guardian – Test Frontend</h1>
+    <div class="small" id="current-user-label">Not logged in</div>
+  </header>
+
+  <div id="status">Ready.</div>
+
+  <main>
+    <!-- Auth card -->
+    <section class="card">
+      <h2>1. Register</h2>
+      <label for="reg-email">Email</label>
+      <input id="reg-email" type="email" placeholder="user@example.com" />
+
+      <label for="reg-password">Password</label>
+      <input id="reg-password" type="password" />
+
+      <label for="reg-name">Name (optional)</label>
+      <input id="reg-name" type="text" />
+
+      <button id="btn-register">Register</button>
+      <p class="small">If the email is already registered, the server will return an error.</p>
+    </section>
+
+    <section class="card">
+      <h2>2. Login</h2>
+      <label for="login-email">Email</label>
+      <input id="login-email" type="email" placeholder="user@example.com" />
+
+      <label for="login-password">Password</label>
+      <input id="login-password" type="password" />
+
+      <button id="btn-login">Login</button>
+      <p class="small">On success, the backend returns a <code>user_id</code>, which we store and send in all later calls.</p>
+    </section>
+
+    <!-- BP & Mood -->
+    <section class="card">
+      <h2>3. Add BP Reading</h2>
+      <label for="bp-systolic">Systolic</label>
+      <input id="bp-systolic" type="number" placeholder="e.g. 130" />
+
+      <label for="bp-diastolic">Diastolic</label>
+      <input id="bp-diastolic" type="number" placeholder="e.g. 85" />
+
+      <button id="btn-add-bp">Add BP</button>
+      <p class="small">Uses <code>POST /api/bp</code> with your <code>X-User-Id</code>.</p>
+    </section>
+
+    <section class="card">
+      <h2>4. Add Mood</h2>
+      <label for="mood-level">Mood Level (1 = high stress, 3 = calm)</label>
+      <select id="mood-level">
+        <option value="1">1 – High stress</option>
+        <option value="2" selected>2 – Medium</option>
+        <option value="3">3 – Calm / good</option>
+      </select>
+
+      <label for="mood-note">Note (optional)</label>
+      <textarea id="mood-note" rows="2" placeholder="e.g. Busy day but okay"></textarea>
+
+      <button id="btn-add-mood">Add Mood</button>
+      <p class="small">Uses <code>POST /api/mood</code>.</p>
+    </section>
+
+    <!-- Dashboard & AI -->
+    <section class="card">
+      <h2>5. Dashboard (Week)</h2>
+      <button id="btn-dashboard-week">Fetch Dashboard (week)</button>
+      <p class="small">Calls <code>GET /api/dashboard?range=week</code>.</p>
+      <pre id="dashboard-output">{}</pre>
+    </section>
+
+    <section class="card">
+      <h2>6. Today’s Recommendation</h2>
+      <button id="btn-reco">Fetch Recommendation</button>
+      <p class="small">Calls <code>GET /api/recommendation/today</code>.</p>
+      <pre id="reco-output">{}</pre>
+    </section>
+
+    <section class="card">
+      <h2>7. Badges</h2>
+      <button id="btn-badges">Fetch Badges</button>
+      <p class="small">Calls <code>GET /api/badges</code>.</p>
+      <pre id="badges-output">{}</pre>
+    </section>
+
+    <section class="card">
+      <h2>8. Raw BP / Mood lists</h2>
+      <button id="btn-list-bp">List BP</button>
+      <button id="btn-list-mood">List Mood</button>
+      <pre id="raw-output">Click a button to see data.</pre>
+    </section>
+  </main>
+
+  <script>
+    let currentUserId = null;
+
+    const statusEl = document.getElementById("status");
+    const currentUserLabel = document.getElementById("current-user-label");
+
+    function setStatus(msg) {
+      statusEl.textContent = msg;
+      console.log("[STATUS]", msg);
+    }
+
+    function setCurrentUser(id, email) {
+      currentUserId = id;
+      if (id) {
+        currentUserLabel.textContent = `Logged in as ${email} (user_id = ${id})`;
+      } else {
+        currentUserLabel.textContent = "Not logged in";
+      }
+    }
+
+    async function apiFetch(path, { method = "GET", body = null, requireUser = true } = {}) {
+      if (requireUser && !currentUserId) {
+        alert("Please login first – no user_id set.");
+        throw new Error("No user_id");
+      }
+
+      const headers = {};
+      if (method !== "GET") {
+        headers["Content-Type"] = "application/json";
+      }
+      if (requireUser && currentUserId) {
+        headers["X-User-Id"] = String(currentUserId);
+      }
+
+      const options = { method, headers };
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      const res = await fetch(path, options);
+      const text = await res.text();
+      let data;
+      try {
+        data = text ? JSON.parse(text) : null;
+      } catch (e) {
+        console.error("Failed to parse JSON:", e, text);
+        throw e;
+      }
+
+      if (!res.ok) {
+        console.error("API error:", res.status, data);
+        throw new Error(data && data.error ? data.error : `HTTP ${res.status}`);
+      }
+      return data;
+    }
+
+    // 1. Register
+    document.getElementById("btn-register").addEventListener("click", async () => {
+      const email = document.getElementById("reg-email").value.trim();
+      const password = document.getElementById("reg-password").value;
+      const name = document.getElementById("reg-name").value.trim();
+
+      if (!email || !password) {
+        alert("Email and password are required.");
+        return;
+      }
+
+      setStatus("Registering user...");
+      try {
+        const data = await apiFetch("/api/auth/register", {
+          method: "POST",
+          body: { email, password, name },
+          requireUser: false
+        });
+        setStatus("Registered! You can now login.");
+        console.log("Register response:", data);
+      } catch (e) {
+        setStatus("Registration failed: " + e.message);
+        alert("Registration error: " + e.message);
+      }
+    });
+
+    // 2. Login
+    document.getElementById("btn-login").addEventListener("click", async () => {
+      const email = document.getElementById("login-email").value.trim();
+      const password = document.getElementById("login-password").value;
+
+      if (!email || !password) {
+        alert("Email and password are required.");
+        return;
+      }
+
+      setStatus("Logging in...");
+      try {
+        const data = await apiFetch("/api/auth/login", {
+          method: "POST",
+          body: { email, password },
+          requireUser: false
+        });
+        setCurrentUser(data.user_id, data.email);
+        setStatus("Logged in successfully.");
+      } catch (e) {
+        setCurrentUser(null, null);
+        setStatus("Login failed: " + e.message);
+        alert("Login error: " + e.message);
+      }
+    });
+
+    // 3. Add BP
+    document.getElementById("btn-add-bp").addEventListener("click", async () => {
+      const systolic = parseInt(document.getElementById("bp-systolic").value, 10);
+      const diastolic = parseInt(document.getElementById("bp-diastolic").value, 10);
+
+      if (!systolic || !diastolic) {
+        alert("Please enter both systolic and diastolic values.");
+        return;
+      }
+
+      setStatus("Sending BP reading...");
+      try {
+        const data = await apiFetch("/api/bp", {
+          method: "POST",
+          body: { systolic, diastolic }
+        });
+        setStatus("BP reading saved.");
+        console.log("BP saved:", data);
+      } catch (e) {
+        setStatus("Failed to save BP: " + e.message);
+        alert("BP error: " + e.message);
+      }
+    });
+
+    // 4. Add Mood
+    document.getElementById("btn-add-mood").addEventListener("click", async () => {
+      const mood_level = parseInt(document.getElementById("mood-level").value, 10);
+      const note = document.getElementById("mood-note").value.trim() || null;
+
+      setStatus("Sending mood log...");
+      try {
+        const data = await apiFetch("/api/mood", {
+          method: "POST",
+          body: { mood_level, note }
+        });
+        setStatus("Mood log saved.");
+        console.log("Mood saved:", data);
+      } catch (e) {
+        setStatus("Failed to save mood: " + e.message);
+        alert("Mood error: " + e.message);
+      }
+    });
+
+    // 5. Dashboard
+    document.getElementById("btn-dashboard-week").addEventListener("click", async () => {
+      setStatus("Fetching dashboard (week)...");
+      const out = document.getElementById("dashboard-output");
+      out.textContent = "...";
+      try {
+        const data = await apiFetch("/api/dashboard?range=week", {
+          method: "GET"
+        });
+        setStatus("Dashboard loaded.");
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        setStatus("Failed to load dashboard: " + e.message);
+        out.textContent = "Error: " + e.message;
+      }
+    });
+
+    // 6. Recommendation
+    document.getElementById("btn-reco").addEventListener("click", async () => {
+      setStatus("Fetching today’s recommendation...");
+      const out = document.getElementById("reco-output");
+      out.textContent = "...";
+      try {
+        const data = await apiFetch("/api/recommendation/today", {
+          method: "GET"
+        });
+        setStatus("Recommendation loaded.");
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        setStatus("Failed to load recommendation: " + e.message);
+        out.textContent = "Error: " + e.message;
+      }
+    });
+
+    // 7. Badges
+    document.getElementById("btn-badges").addEventListener("click", async () => {
+      setStatus("Fetching badges...");
+      const out = document.getElementById("badges-output");
+      out.textContent = "...";
+      try {
+        const data = await apiFetch("/api/badges", {
+          method: "GET"
+        });
+        setStatus("Badges loaded.");
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        setStatus("Failed to load badges: " + e.message);
+        out.textContent = "Error: " + e.message;
+      }
+    });
+
+    // 8. Raw BP / Mood lists
+    document.getElementById("btn-list-bp").addEventListener("click", async () => {
+      setStatus("Fetching BP list...");
+      const out = document.getElementById("raw-output");
+      out.textContent = "...";
+      try {
+        const data = await apiFetch("/api/bp", { method: "GET" });
+        setStatus("BP list loaded.");
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        setStatus("Failed to load BP list: " + e.message);
+        out.textContent = "Error: " + e.message;
+      }
+    });
+
+    document.getElementById("btn-list-mood").addEventListener("click", async () => {
+      setStatus("Fetching mood list...");
+      const out = document.getElementById("raw-output");
+      out.textContent = "...";
+      try {
+        const data = await apiFetch("/api/mood", { method: "GET" });
+        setStatus("Mood list loaded.");
+        out.textContent = JSON.stringify(data, null, 2);
+      } catch (e) {
+        setStatus("Failed to load mood list: " + e.message);
+        out.textContent = "Error: " + e.message;
+      }
+    });
+  </script>
+</body>
+</html>

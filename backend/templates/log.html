@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}BP Guardian | Log{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h4 mb-0">Log Readings</h2>
+</div>
+
+<div class="row g-3">
+  <div class="col-12 col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h3 class="h6 mb-3">Log Blood Pressure</h3>
+
+        <div class="mb-3">
+          <label class="form-label">Systolic (mmHg)</label>
+          <input class="form-control" id="bpSys" type="number" placeholder="e.g. 130">
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Diastolic (mmHg)</label>
+          <input class="form-control" id="bpDia" type="number" placeholder="e.g. 85">
+        </div>
+
+        <button class="btn btn-primary w-100" id="btnSaveBp" type="button">Save BP Reading</button>
+        <div class="text-muted small mt-2">Saved to <code>/api/bp</code></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-6">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h3 class="h6 mb-3">Log Mood</h3>
+
+        <div class="mb-3">
+          <label class="form-label">Mood Level</label>
+          <select class="form-select" id="moodLevel">
+            <option value="1">1 – High stress</option>
+            <option value="2" selected>2 – Medium</option>
+            <option value="3">3 – Calm</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">Note (optional)</label>
+          <textarea class="form-control" id="moodNote" rows="2" placeholder="What happened today?"></textarea>
+        </div>
+
+        <button class="btn btn-primary w-100" id="btnSaveMood" type="button">Save Mood</button>
+        <div class="text-muted small mt-2">Saved to <code>/api/mood</code></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm mt-3">
+  <div class="card-body">
+    <h3 class="h6 mb-2">Quick Check</h3>
+    <div class="d-flex gap-2 flex-wrap">
+      <button class="btn btn-outline-primary btn-sm" id="btnListBp" type="button">View Last BP Logs</button>
+      <button class="btn btn-outline-primary btn-sm" id="btnListMood" type="button">View Last Mood Logs</button>
+    </div>
+    <pre class="mt-3 mb-0" id="rawOut">Click buttons to view JSON.</pre>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/log.js"></script>
+{% endblock %}

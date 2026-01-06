@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}BP Guardian | Badges{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2 class="h4 mb-0">Badges</h2>
+  <button class="btn btn-primary btn-sm" id="btnRefreshBadges" type="button">Refresh</button>
+</div>
+
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small mb-2" id="newBadgeLine">—</div>
+        <div class="badge-grid" id="badgesGrid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/badges.js"></script>
+{% endblock %}

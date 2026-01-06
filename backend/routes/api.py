@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request, abort
+from flask import Blueprint, jsonify, request, abort, render_template
 from datetime import datetime, timedelta, date
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -7,14 +7,16 @@ from ..models import BPReading, MoodLog, User, Badge, UserBadge
 from ..services.rules_engine import get_daily_recommendation
 from ..services.badges import evaluate_and_award_badges
 
-
-
 api_bp = Blueprint("api", __name__)
 
+
+# -----------------------
+# AUTH HELPER
+# -----------------------
 def get_current_user_id():
     """
-    Very simple auth for prototype:
-    - Frontend must send header: X-User-Id: <user_id>
+    Prototype auth:
+    - Frontend sends header: X-User-Id: <user_id>
     - We verify the user exists.
     """
     user_id = request.headers.get("X-User-Id")
@@ -33,49 +35,52 @@ def get_current_user_id():
     return user_id_int
 
 
+# -----------------------
+# PAGES (Frontend routes)
+# -----------------------
 @api_bp.route("/", methods=["GET"])
-def index():
-    return jsonify({
-        "message": "Welcome to BP Guardian backend",
-        "endpoints": [
-            "/ping",
-            "/api/bp (GET, POST)",
-            "/api/mood (GET, POST)"
-        ]
-    })
+def page_auth():
+    # Your landing page / login page
+    return render_template("auth.html")
 
 
+@api_bp.route("/dashboard", methods=["GET"])
+def page_dashboard():
+    return render_template("dashboard.html")
+
+
+@api_bp.route("/log", methods=["GET"])
+def page_log():
+    return render_template("log.html")
+
+
+@api_bp.route("/insights", methods=["GET"])
+def page_insights():
+    return render_template("insights.html")
+
+
+@api_bp.route("/badges", methods=["GET"])
+def page_badges():
+    return render_template("badges.html")
+
+
+# -----------------------
+# HEALTH CHECK
+# -----------------------
 @api_bp.route("/ping", methods=["GET"])
 def ping():
-    return jsonify({
-        "status": "ok",
-        "message": "BP Guardian backend is running"
-    })
+    return jsonify({"status": "ok", "message": "BP Guardian backend is running"}), 200
 
-
-# -----------------------
-# BP ENDPOINTS
-# -----------------------
 
 # -----------------------
 # AUTH ENDPOINTS
 # -----------------------
-
 @api_bp.route("/api/auth/register", methods=["POST"])
 def register():
-    """
-    Register a new user.
-    Expected JSON:
-    {
-      "email": "user@example.com",
-      "password": "secret123",
-      "name": "Optional Name"
-    }
-    """
     data = request.get_json() or {}
-    email = data.get("email")
+    email = (data.get("email") or "").strip().lower()
     password = data.get("password")
-    name = data.get("name")
+    name = (data.get("name") or "").strip() or None
 
     if not email or not password:
         return jsonify({"error": "email and password are required"}), 400
@@ -85,8 +90,8 @@ def register():
         return jsonify({"error": "Email already registered"}), 400
 
     password_hash = generate_password_hash(password)
-
     user = User(email=email, password_hash=password_hash, name=name)
+
     db.session.add(user)
     db.session.commit()
 
@@ -100,18 +105,8 @@ def register():
 
 @api_bp.route("/api/auth/login", methods=["POST"])
 def login():
-    """
-    Login for existing user.
-    Expected JSON:
-    {
-      "email": "user@example.com",
-      "password": "secret123"
-    }
-
-    Returns user_id if successful.
-    """
     data = request.get_json() or {}
-    email = data.get("email")
+    email = (data.get("email") or "").strip().lower()
     password = data.get("password")
 
     if not email or not password:
@@ -129,44 +124,33 @@ def login():
     }), 200
 
 
+# -----------------------
+# BP ENDPOINTS
+# -----------------------
 @api_bp.route("/api/bp", methods=["POST"])
 def add_bp_reading():
     user_id = get_current_user_id()
-
-    data = request.get_json()
-
-    if not data:
-        return jsonify({"error": "JSON body is required"}), 400
+    data = request.get_json() or {}
 
     try:
         systolic = int(data.get("systolic"))
         diastolic = int(data.get("diastolic"))
     except (TypeError, ValueError):
-        return jsonify({
-            "error": "systolic and diastolic must be integers"
-        }), 400
+        return jsonify({"error": "systolic and diastolic must be integers"}), 400
 
     if systolic <= 0 or diastolic <= 0:
-        return jsonify({
-            "error": "systolic and diastolic must be positive values"
-        }), 400
+        return jsonify({"error": "systolic and diastolic must be positive values"}), 400
 
-    timestamp_str = data.get("timestamp")
     timestamp = None
+    timestamp_str = data.get("timestamp")
     if timestamp_str:
         try:
             timestamp = datetime.fromisoformat(timestamp_str)
         except ValueError:
-            return jsonify({
-                "error": "timestamp must be ISO 8601, e.g. 2025-11-14T19:45:00"
-            }), 400
+            return jsonify({"error": "timestamp must be ISO 8601"}), 400
 
-    reading = BPReading(
-        user_id=user_id,
-        systolic=systolic,
-        diastolic=diastolic,
-    )
-    if timestamp is not None:
+    reading = BPReading(user_id=user_id, systolic=systolic, diastolic=diastolic)
+    if timestamp:
         reading.timestamp = timestamp
 
     db.session.add(reading)
@@ -198,64 +182,45 @@ def list_bp_readings():
         .all()
     )
 
-    result = [
+    return jsonify([
         {
             "id": r.id,
             "user_id": r.user_id,
             "systolic": r.systolic,
             "diastolic": r.diastolic,
             "timestamp": r.timestamp.isoformat()
-        }
-        for r in readings
-    ]
-
-    return jsonify(result), 200
-
+        } for r in readings
+    ]), 200
 
 
 # -----------------------
 # MOOD ENDPOINTS
 # -----------------------
-
 @api_bp.route("/api/mood", methods=["POST"])
 def add_mood_log():
     user_id = get_current_user_id()
-
-    data = request.get_json()
-
-    if not data:
-        return jsonify({"error": "JSON body is required"}), 400
+    data = request.get_json() or {}
 
     try:
         mood_level = int(data.get("mood_level"))
     except (TypeError, ValueError):
-        return jsonify({
-            "error": "mood_level must be an integer (1, 2 or 3)"
-        }), 400
+        return jsonify({"error": "mood_level must be an integer (1,2,3)"}), 400
 
     if mood_level not in (1, 2, 3):
-        return jsonify({
-            "error": "mood_level must be 1 (high stress), 2 (medium), or 3 (calm)"
-        }), 400
+        return jsonify({"error": "mood_level must be 1, 2, or 3"}), 400
 
     note = data.get("note")
 
-    timestamp_str = data.get("timestamp")
     timestamp = None
+    timestamp_str = data.get("timestamp")
     if timestamp_str:
         try:
             timestamp = datetime.fromisoformat(timestamp_str)
         except ValueError:
-            return jsonify({
-                "error": "timestamp must be ISO 8601, e.g. 2025-11-14T19:50:00"
-            }), 400
+            return jsonify({"error": "timestamp must be ISO 8601"}), 400
 
-    mood_log = MoodLog(
-        user_id=user_id,
-        mood_level=mood_level,
-        note=note
-    )
-    if timestamp is not None:
+    mood_log = MoodLog(user_id=user_id, mood_level=mood_level, note=note)
+    if timestamp:
         mood_log.timestamp = timestamp
 
     db.session.add(mood_log)
@@ -287,41 +252,30 @@ def list_mood_logs():
         .all()
     )
 
-    result = [
+    return jsonify([
         {
             "id": m.id,
             "user_id": m.user_id,
             "mood_level": m.mood_level,
             "note": m.note,
             "timestamp": m.timestamp.isoformat()
-        }
-        for m in moods
-    ]
-
-    return jsonify(result), 200
+        } for m in moods
+    ]), 200
 
 
 # -----------------------
 # DASHBOARD ENDPOINT
 # -----------------------
-
 def _get_range_days(range_param: str) -> int:
-    """
-    Map ?range= param to number of days.
-    Supported: week, month, year. Default: week.
-    """
     range_param = (range_param or "").lower()
     if range_param == "month":
         return 30
-    elif range_param == "year":
+    if range_param == "year":
         return 365
-    # default
     return 7  # week
 
+
 def classify_mood_from_avg(avg_mood: float) -> str:
-    """
-    Convert numeric avg_mood (1–3) into a category label.
-    """
     if avg_mood < 1.5:
         return "high_stress"
     elif avg_mood < 2.5:
@@ -330,41 +284,30 @@ def classify_mood_from_avg(avg_mood: float) -> str:
         return "calm"
 
 
-
 @api_bp.route("/api/dashboard", methods=["GET"])
 def dashboard():
-    """
-    Dashboard data combining BP and mood.
-
-    Query params:
-      ?range=week   (default)
-      ?range=month
-      ?range=year
-    """
     user_id = get_current_user_id()
+
     range_param = request.args.get("range", "week")
     days = _get_range_days(range_param)
 
     end_dt = datetime.utcnow()
     start_dt = end_dt - timedelta(days=days)
 
-    # --- Query BP readings in range ---
     bp_readings = (
         BPReading.query
-        .filter(BPReading.user_id == user_id,BPReading.timestamp >= start_dt)
+        .filter(BPReading.user_id == user_id, BPReading.timestamp >= start_dt)
         .order_by(BPReading.timestamp.asc())
         .all()
     )
 
-    # --- Query mood logs in range ---
     mood_logs = (
         MoodLog.query
-        .filter(MoodLog.user_id == user_id,MoodLog.timestamp >= start_dt)
+        .filter(MoodLog.user_id == user_id, MoodLog.timestamp >= start_dt)
         .order_by(MoodLog.timestamp.asc())
         .all()
     )
 
-    # If no BP data, return empty dashboard
     if not bp_readings:
         return jsonify({
             "range": range_param,
@@ -375,75 +318,25 @@ def dashboard():
             "lowest_bp": None,
             "bp_series": [],
             "mood_series": [],
-            "daily_summary": {
-                "bp_daily": [],
-                "mood_daily": [],
-                "correlation_points": []
-            }
+            "daily_summary": {"bp_daily": [], "mood_daily": [], "correlation_points": []}
         }), 200
 
-    # ---------------------------
-    # Last, highest, lowest BP
-    # ---------------------------
     last_bp = bp_readings[-1]
+    highest_bp = max(bp_readings, key=lambda r: (r.systolic, r.diastolic))
+    lowest_bp = min(bp_readings, key=lambda r: (r.systolic, r.diastolic))
 
-    highest_bp = max(
-        bp_readings,
-        key=lambda r: (r.systolic, r.diastolic)
-    )
-    lowest_bp = min(
-        bp_readings,
-        key=lambda r: (r.systolic, r.diastolic)
-    )
+    last_bp_obj = {"systolic": last_bp.systolic, "diastolic": last_bp.diastolic, "timestamp": last_bp.timestamp.isoformat()}
+    highest_bp_obj = {"systolic": highest_bp.systolic, "diastolic": highest_bp.diastolic, "timestamp": highest_bp.timestamp.isoformat()}
+    lowest_bp_obj = {"systolic": lowest_bp.systolic, "diastolic": lowest_bp.diastolic, "timestamp": lowest_bp.timestamp.isoformat()}
 
-    last_bp_obj = {
-        "systolic": last_bp.systolic,
-        "diastolic": last_bp.diastolic,
-        "timestamp": last_bp.timestamp.isoformat()
-    }
+    bp_series = [{"timestamp": r.timestamp.isoformat(), "systolic": r.systolic, "diastolic": r.diastolic} for r in bp_readings]
+    mood_series = [{"timestamp": m.timestamp.isoformat(), "mood_level": m.mood_level, "note": m.note} for m in mood_logs]
 
-    highest_bp_obj = {
-        "systolic": highest_bp.systolic,
-        "diastolic": highest_bp.diastolic,
-        "timestamp": highest_bp.timestamp.isoformat()
-    }
-
-    lowest_bp_obj = {
-        "systolic": lowest_bp.systolic,
-        "diastolic": lowest_bp.diastolic,
-        "timestamp": lowest_bp.timestamp.isoformat()
-    }
-
-    # ---------------------------
-    # Time series for graphs
-    # ---------------------------
-    bp_series = [
-        {
-            "timestamp": r.timestamp.isoformat(),
-            "systolic": r.systolic,
-            "diastolic": r.diastolic
-        }
-        for r in bp_readings
-    ]
-
-    mood_series = [
-        {
-            "timestamp": m.timestamp.isoformat(),
-            "mood_level": m.mood_level,
-            "note": m.note
-        }
-        for m in mood_logs
-    ]
-
-    # ---------------------------
-    # Daily averages + correlation
-    # ---------------------------
     # Group BP by date
     bp_by_date = {}
     for r in bp_readings:
         d = r.timestamp.date()
-        if d not in bp_by_date:
-            bp_by_date[d] = {"systolic": [], "diastolic": []}
+        bp_by_date.setdefault(d, {"systolic": [], "diastolic": []})
         bp_by_date[d]["systolic"].append(r.systolic)
         bp_by_date[d]["diastolic"].append(r.diastolic)
 
@@ -451,11 +344,7 @@ def dashboard():
     for d, vals in sorted(bp_by_date.items()):
         avg_sys = sum(vals["systolic"]) / len(vals["systolic"])
         avg_dia = sum(vals["diastolic"]) / len(vals["diastolic"])
-        bp_daily.append({
-            "date": d.isoformat(),
-            "avg_systolic": round(avg_sys, 1),
-            "avg_diastolic": round(avg_dia, 1)
-        })
+        bp_daily.append({"date": d.isoformat(), "avg_systolic": round(avg_sys, 1), "avg_diastolic": round(avg_dia, 1)})
 
     # Group mood by date
     mood_by_date = {}
@@ -464,18 +353,13 @@ def dashboard():
         if d not in mood_by_date:
             mood_by_date[d] = []
         mood_by_date[d].append(m.mood_level)
-
-        mood_daily = []
+        
+    mood_daily = []
     for d, levels in sorted(mood_by_date.items()):
         avg_mood = sum(levels) / len(levels)
         category = classify_mood_from_avg(avg_mood)
-        mood_daily.append({
-            "date": d.isoformat(),
-            "avg_mood": round(avg_mood, 2),
-            "mood_category": category
-        })
+        mood_daily.append({"date": d.isoformat(), "avg_mood": round(avg_mood, 2), "mood_category": category})
 
-    # Correlation points: only days where we have both BP & mood
     correlation_points = []
     for d in sorted(bp_by_date.keys()):
         if d in mood_by_date:
@@ -490,7 +374,6 @@ def dashboard():
                 "avg_mood": round(avg_mood, 2),
                 "mood_category": category
             })
-
 
     return jsonify({
         "range": range_param,
@@ -507,11 +390,11 @@ def dashboard():
             "correlation_points": correlation_points
         }
     }), 200
-    
-    # -----------------------
+
+
+# -----------------------
 # RECOMMENDATION ENDPOINT
 # -----------------------
-
 @api_bp.route("/api/recommendation/today", methods=["GET"])
 def recommendation_today():
     user_id = get_current_user_id()
@@ -523,17 +406,9 @@ def recommendation_today():
 # -----------------------
 # BADGES ENDPOINT
 # -----------------------
-
 @api_bp.route("/api/badges", methods=["GET"])
 def get_badges():
-    """
-    Evaluate which badges the user has earned based on recent activity.
-    Returns all badges with their earned status, plus which ones are new.
-    """
+    user_id = get_current_user_id()
     today = date.today()
-    result = evaluate_and_award_badges(db.session, today)
+    result = evaluate_and_award_badges(db.session, today, user_id)
     return jsonify(result), 200
-
-
-
-

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}BP Guardian | Login{% endblock %}
+{% block nav %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-12 col-md-7 col-lg-5">
+    <div class="text-center mb-4">
+      <div class="d-flex justify-content-center align-items-center gap-2">
+        <div class="brand-dot big"></div>
+        <h1 class="h3 mb-0">BP Guardian</h1>
+      </div>
+      <div class="text-muted">Track • Understand • Improve</div>
+    </div>
+
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+
+        <ul class="nav nav-tabs mb-3" id="authTabs">
+          <li class="nav-item">
+            <button class="nav-link active" id="tab-login" data-bs-toggle="tab" data-bs-target="#pane-login">Login</button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tab-register" data-bs-toggle="tab" data-bs-target="#pane-register">Register</button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Login -->
+          <div class="tab-pane fade show active" id="pane-login">
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input class="form-control" id="loginEmail" type="email" placeholder="you@example.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input class="form-control" id="loginPassword" type="password" placeholder="••••••••">
+            </div>
+            <button class="btn btn-primary w-100" id="btnLogin" type="button">Login</button>
+          </div>
+
+          <!-- Register -->
+          <div class="tab-pane fade" id="pane-register">
+            <div class="mb-3">
+              <label class="form-label">Name (optional)</label>
+              <input class="form-control" id="regName" type="text" placeholder="Your name">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input class="form-control" id="regEmail" type="email" placeholder="you@example.com">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Password</label>
+              <input class="form-control" id="regPassword" type="password" placeholder="Create a password">
+            </div>
+            <button class="btn btn-primary w-100" id="btnRegister" type="button">Register</button>
+            <div class="text-muted small mt-2">
+              After registering, switch back to Login.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="text-center text-muted small mt-3">
+      Prototype UI for testing your backend APIs.
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/auth.js"></script>
+{% endblock %}

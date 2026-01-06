@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}BP Guardian | Dashboard{% endblock %}
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h2 class="h4 mb-0">Dashboard</h2>
+
+  <div class="d-flex align-items-center gap-2">
+    <label class="text-muted small mb-0">Range</label>
+    <select class="form-select form-select-sm" style="width: 130px;" id="rangeSelect">
+      <option value="week" selected>Week</option>
+      <option value="month">Month</option>
+      <option value="year">Year</option>
+    </select>
+    <button class="btn btn-primary btn-sm" id="btnRefresh" type="button">Refresh</button>
+  </div>
+</div>
+
+<!-- Top cards -->
+<div class="row g-3 mb-3">
+  <div class="col-12 col-md-3">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Last Reading</div>
+        <div class="stat-value" id="lastReading">—</div>
+        <div class="text-muted small" id="lastReadingMeta">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-3">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Highest This Range</div>
+        <div class="stat-value text-danger" id="highestReading">—</div>
+        <div class="text-muted small" id="highestReadingMeta">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-3">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Lowest This Range</div>
+        <div class="stat-value text-primary" id="lowestReading">—</div>
+        <div class="text-muted small" id="lowestReadingMeta">—</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-md-3">
+    <div class="card stat-card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="text-muted small">Mood Status</div>
+        <div class="stat-value" id="moodStatus">—</div>
+        <div class="text-muted small">From mood logs</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Charts -->
+<div class="row g-3 mb-3">
+  <div class="col-12 col-lg-7">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center">
+          <h3 class="h6 mb-0">Blood Pressure Trend</h3>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="bpTrendChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-12 col-lg-5">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <h3 class="h6 mb-2">Mood & BP Correlation (daily)</h3>
+        <div class="chart-wrap">
+          <canvas id="corrChart"></canvas>
+        </div>
+        <div class="text-muted small mt-2" id="corrHint">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Recommendation -->
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h3 class="h6 mb-2">Today’s Recommendation</h3>
+    <div id="recoSummary" class="mb-2 text-muted">—</div>
+    <ul id="recoList" class="mb-0"></ul>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

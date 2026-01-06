@@ -1,0 +1,66 @@
+.brand-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  background: #fff;
+  display: inline-block;
+}
+.brand-dot.big {
+  width: 18px;
+  height: 18px;
+  background: #2563eb;
+}
+
+.stat-card .stat-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.chart-wrap {
+  height: 280px;
+}
+
+pre {
+  background: #0b1220;
+  color: #e5e7eb;
+  padding: 0.75rem;
+  border-radius: 0.6rem;
+  font-size: 0.85rem;
+  max-height: 300px;
+  overflow: auto;
+  margin: 0;
+}
+
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+}
+
+.badge-tile {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 12px;
+  background: #fff;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+
+.badge-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: white;
+}
+
+.badge-icon.earned { background: #16a34a; }
+.badge-icon.locked { background: #9ca3af; }
+
+.badge-name { font-weight: 700; }
+.badge-desc { color: #6b7280; font-size: 0.85rem; }
+.badge-date { color: #6b7280; font-size: 0.8rem; margin-top: 4px; }
