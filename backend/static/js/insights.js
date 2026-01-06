@@ -7,7 +7,7 @@ function buildInsights(corrSeries) {
   const mood = [];
 
   for (const r of corrSeries) {
-    labels.push((r.date || "").slice(0, 10));
+    labels.push(String(r.date || "").slice(0, 10));
     sys.push(r.avg_systolic ?? null);
     dia.push(r.avg_diastolic ?? null);
     mood.push(r.avg_mood ?? null);
@@ -24,7 +24,9 @@ async function loadInsights() {
 
   try {
     const dash = await apiRequest("/api/dashboard?range=week", { method: "GET" });
-    const corrSeries = dash.correlation_points || [];
+
+    // ✅ FIX: correct path
+    const corrSeries = dash.daily_summary?.correlation_points || [];
 
     const data = buildInsights(corrSeries);
 
@@ -36,21 +38,61 @@ async function loadInsights() {
       data: {
         labels: data.labels,
         datasets: [
-          { label: "Avg Systolic", data: data.sys, tension: 0.25 },
-          { label: "Avg Diastolic", data: data.dia, tension: 0.25 },
-          { label: "Avg Mood (1–3)", data: data.mood, tension: 0.25 }
+          {
+            label: "Avg Systolic",
+            data: data.sys,
+            yAxisID: "y1",
+            tension: 0.25
+          },
+          {
+            label: "Avg Diastolic",
+            data: data.dia,
+            yAxisID: "y1",
+            tension: 0.25
+          },
+          {
+            label: "Avg Mood (1–3)",
+            data: data.mood,
+            yAxisID: "y2",
+            tension: 0.25
+          }
         ]
       },
-      options: { responsive: true, maintainAspectRatio: false }
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y1: {
+            position: "left",
+            title: { display: true, text: "Blood Pressure (mmHg)" }
+          },
+          y2: {
+            position: "right",
+            min: 1,
+            max: 5,
+            title: { display: true, text: "Mood (1–3)" },
+            grid: { drawOnChartArea: false }
+          }
+        }
+      }
     });
 
-    insightsText.textContent = corrSeries.length
-      ? "We show daily BP averages with mood averages. Watch whether BP rises when mood is low (stress)."
-      : "Not enough overlap yet. Log mood on the same days you log BP to see correlation.";
+    // Insight text
+    if (corrSeries.length >= 2) {
+      insightsText.textContent =
+        "This chart compares daily blood pressure averages with mood levels. Notice whether BP increases on days with higher stress.";
+    } else if (corrSeries.length === 1) {
+      insightsText.textContent =
+        "Only one day of overlapping data so far. Add another day to see a pattern.";
+    } else {
+      insightsText.textContent =
+        "Not enough overlap yet. Log mood on the same days you log BP to see insights.";
+    }
 
     // Recommendation summary
     const reco = await apiRequest("/api/recommendation/today", { method: "GET" });
     insRecoSummary.textContent = reco.summary || "—";
+
     (reco.recommendations || []).forEach(tip => {
       const li = document.createElement("li");
       li.textContent = tip;
@@ -64,6 +106,9 @@ async function loadInsights() {
 
 document.addEventListener("DOMContentLoaded", async () => {
   requireAuth();
-  document.getElementById("btnRefreshInsights").addEventListener("click", loadInsights);
+  document
+    .getElementById("btnRefreshInsights")
+    .addEventListener("click", loadInsights);
+
   await loadInsights();
 });

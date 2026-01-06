@@ -34,21 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.getElementById("btnListBp").addEventListener("click", async () => {
-    try {
-      const data = await apiRequest("/api/bp?limit=10", { method: "GET" });
-      rawOut.textContent = JSON.stringify(data, null, 2);
-    } catch (e) {
-      rawOut.textContent = `Error: ${e.message}`;
-    }
-  });
-
-  document.getElementById("btnListMood").addEventListener("click", async () => {
-    try {
-      const data = await apiRequest("/api/mood?limit=10", { method: "GET" });
-      rawOut.textContent = JSON.stringify(data, null, 2);
-    } catch (e) {
-      rawOut.textContent = `Error: ${e.message}`;
-    }
-  });
+  
 });
+
+
+  

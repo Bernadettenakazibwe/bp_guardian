@@ -23,7 +23,7 @@
         </div>
 
         <button class="btn btn-primary w-100" id="btnSaveBp" type="button">Save BP Reading</button>
-        <div class="text-muted small mt-2">Saved to <code>/api/bp</code></div>
+        <!-- <div class="text-muted small mt-2">Saved to <code>/api/bp</code></div> -->
       </div>
     </div>
   </div>
@@ -48,22 +48,13 @@
         </div>
 
         <button class="btn btn-primary w-100" id="btnSaveMood" type="button">Save Mood</button>
-        <div class="text-muted small mt-2">Saved to <code>/api/mood</code></div>
+        <!--<div class="text-muted small mt-2">Saved to <code>/api/mood</code></div> -->
       </div>
     </div>
   </div>
 </div>
 
-<div class="card border-0 shadow-sm mt-3">
-  <div class="card-body">
-    <h3 class="h6 mb-2">Quick Check</h3>
-    <div class="d-flex gap-2 flex-wrap">
-      <button class="btn btn-outline-primary btn-sm" id="btnListBp" type="button">View Last BP Logs</button>
-      <button class="btn btn-outline-primary btn-sm" id="btnListMood" type="button">View Last Mood Logs</button>
-    </div>
-    <pre class="mt-3 mb-0" id="rawOut">Click buttons to view JSON.</pre>
-  </div>
-</div>
+
 {% endblock %}
 
 {% block scripts %}

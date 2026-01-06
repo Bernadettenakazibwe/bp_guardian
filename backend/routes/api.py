@@ -240,7 +240,7 @@ def list_mood_logs():
     user_id = get_current_user_id()
 
     try:
-        limit = int(request.args.get("limit", 20))
+        limit = int(request.args.get("limit", 3))
     except ValueError:
         limit = 20
 

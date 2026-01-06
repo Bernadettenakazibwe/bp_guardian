@@ -2,41 +2,70 @@ let bpTrendChart = null;
 let corrChart = null;
 
 function getSeriesFromDashboard(dash) {
-  // We accept multiple possible shapes (be forgiving).
-  const bpSeries = dash.bp_series || dash.bp_daily || dash.bp_trend || [];
-  const moodSeries = dash.mood_series || dash.mood_daily || [];
-  const corrSeries = dash.correlation_points || dash.correlation || [];
+  const bpDaily = dash.daily_summary?.bp_daily || [];
+  const moodDaily = dash.daily_summary?.mood_daily || [];
+  const corrSeries = dash.daily_summary?.correlation_points || [];
 
-  return { bpSeries, moodSeries, corrSeries };
+  // fallback to raw series if daily is missing
+  const bpSeries = bpDaily.length ? bpDaily : (dash.bp_series || []);
+  const moodSeries = moodDaily.length ? moodDaily : (dash.mood_series || []);
+
+  return { bpSeries, moodSeries, corrSeries, bpDaily, moodDaily };
 }
 
 function buildBpChartData(bpSeries) {
-  // Expect entries like: {date, avg_systolic, avg_diastolic} OR {timestamp, systolic, diastolic}
+  // Supports:
+  //  - daily: {date, avg_systolic, avg_diastolic}
+  //  - raw:  {timestamp, systolic, diastolic}
   const labels = [];
   const sys = [];
   const dia = [];
 
   for (const row of bpSeries) {
     const label = row.date || row.day || row.timestamp || row.time || "";
-    labels.push(label.slice(0, 10));
+    labels.push(String(label).slice(0, 10));
     sys.push(row.avg_systolic ?? row.systolic ?? row.sys ?? null);
     dia.push(row.avg_diastolic ?? row.diastolic ?? row.dia ?? null);
   }
+
   return { labels, sys, dia };
 }
 
 function buildCorrChartData(corrSeries) {
-  // We'll plot avg_systolic and avg_mood on same chart with two Y axes.
+  // corrSeries entries look like:
+  // {date, avg_systolic, avg_diastolic, avg_mood, mood_category}
   const labels = [];
   const sys = [];
   const mood = [];
 
   for (const row of corrSeries) {
-    labels.push((row.date || "").slice(0, 10));
-    sys.push(row.avg_systolic ?? row.systolic ?? null);
+    labels.push(String(row.date || "").slice(0, 10));
+    sys.push(row.avg_systolic ?? null);
     mood.push(row.avg_mood ?? null);
   }
   return { labels, sys, mood };
+}
+
+function computeMoodStatusFromDaily(moodDaily) {
+  // moodDaily: [{date, avg_mood, mood_category}]
+  if (!moodDaily || moodDaily.length === 0) return "no_data";
+
+  const counts = {};
+  for (const m of moodDaily) {
+    const cat = m.mood_category || "no_data";
+    counts[cat] = (counts[cat] || 0) + 1;
+  }
+
+  // pick most frequent
+  let best = "no_data";
+  let bestCount = -1;
+  for (const [cat, c] of Object.entries(counts)) {
+    if (c > bestCount) {
+      best = cat;
+      bestCount = c;
+    }
+  }
+  return best;
 }
 
 async function loadRecommendation() {
@@ -82,9 +111,9 @@ async function loadDashboard() {
     const dash = await apiRequest(`/api/dashboard?range=${encodeURIComponent(range)}`, { method: "GET" });
 
     // Cards
-    const last = dash.last_bp || dash.last_reading || dash.last || null;
-    const high = dash.highest_bp || dash.highest || null;
-    const low = dash.lowest_bp || dash.lowest || null;
+    const last = dash.last_bp || null;
+    const high = dash.highest_bp || null;
+    const low = dash.lowest_bp || null;
 
     lastReading.textContent = formatBP(last);
     lastReadingMeta.textContent = last?.timestamp ? formatDate(last.timestamp) : "—";
@@ -95,14 +124,14 @@ async function loadDashboard() {
     lowestReading.textContent = formatBP(low);
     lowestReadingMeta.textContent = low?.timestamp ? formatDate(low.timestamp) : "—";
 
-    // Mood status: use weekly avg category if available
-    const moodCat = dash.mood_status || dash.week_mood_category || dash.mood_category || null;
+    // Series
+    const { bpSeries, moodDaily, corrSeries } = getSeriesFromDashboard(dash);
+
+    // Mood Status computed from moodDaily
+    const moodCat = computeMoodStatusFromDaily(moodDaily);
     moodStatus.textContent = moodLabel(moodCat);
 
-    // Charts
-    const { bpSeries, corrSeries } = getSeriesFromDashboard(dash);
-
-    // BP Trend chart
+    // BP Trend chart (prefer daily)
     const bpData = buildBpChartData(bpSeries);
 
     const ctx1 = document.getElementById("bpTrendChart");
@@ -124,8 +153,9 @@ async function loadDashboard() {
       }
     });
 
-    // Correlation chart (dual axis)
+    // Correlation chart (needs at least 2 days to look meaningful)
     const corrData = buildCorrChartData(corrSeries);
+
     const ctx2 = document.getElementById("corrChart");
     if (corrChart) corrChart.destroy();
 
@@ -143,14 +173,18 @@ async function loadDashboard() {
         maintainAspectRatio: false,
         scales: {
           y1: { position: "left", title: { display: true, text: "Systolic" } },
-          y2: { position: "right", min: 1, max: 3, title: { display: true, text: "Mood (1–3)" }, grid: { drawOnChartArea: false } }
+          y2: { position: "right", min: 1, max: 5, title: { display: true, text: "Mood (1–3)" }, grid: { drawOnChartArea: false } }
         }
       }
     });
 
-    corrHint.textContent = corrSeries.length
-      ? "Hint: if systolic rises when mood is low (stress), stress may affect BP."
-      : "Not enough daily overlap between BP and mood yet.";
+    if (corrSeries.length >= 2) {
+      corrHint.textContent = "Hint: if systolic rises when mood is low (stress), stress may affect BP.";
+    } else if (corrSeries.length === 1) {
+      corrHint.textContent = "Only 1 day of overlap so far — add another day to see a trend.";
+    } else {
+      corrHint.textContent = "Not enough daily overlap between BP and mood yet.";
+    }
 
   } catch (e) {
     showToast(`Dashboard error: ${e.message}`, "danger");
