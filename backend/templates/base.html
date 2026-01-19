@@ -41,8 +41,12 @@
 </head>
 <body class="bg-light">
 
-<div id="offlineBanner">You are offline. Some features may be unavailable.</div>
-<div class="page-overlay"></div>
+<div id="offlineBanner" style="display:none; position: fixed; top: 0; left: 0; right: 0; background: #f59e0b; color: #000; text-align: center; padding: 0.5rem; z-index: 9999; font-weight: 600;">
+  📡 You are offline. Data will be saved locally and synced when online.
+</div>
+<div id="syncStatus" style="display:none; position: fixed; top: 50px; right: 20px; background: #3b82f6; color: #fff; padding: 0.75rem 1.5rem; border-radius: 4px; z-index: 9998; font-size: 0.9rem;">
+  ⏳ Syncing...
+</div>
 
 {% block nav %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -83,28 +87,26 @@
 
 <!-- App JS -->
 <script src="/static/js/api.js"></script>
+<script src="/static/js/offline-storage.js"></script>
+<script src="/static/js/sync.js"></script>
+<script src="/static/js/offline-status.js"></script>
 <script src="/static/js/ui.js"></script>
 
 {% block scripts %}{% endblock %}
 
 <script>
-  // Register Service Worker
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('Service Worker registered'))
-      .catch(err => console.error('SW registration failed:', err));
-    });
-  }
-
-  // Offline banner toggle
+  // Update offline banner visibility
   const offlineBanner = document.getElementById("offlineBanner");
   function updateOfflineStatus() {
-    offlineBanner.style.display = navigator.onLine ? "none" : "block";
+    if (!navigator.onLine) {
+      offlineBanner.style.display = "block";
+    } else {
+      offlineBanner.style.display = "none";
+    }
   }
   window.addEventListener("online", updateOfflineStatus);
   window.addEventListener("offline", updateOfflineStatus);
-  updateOfflineStatus();
+  document.addEventListener("DOMContentLoaded", updateOfflineStatus);
 </script>
 </body>
 </html>

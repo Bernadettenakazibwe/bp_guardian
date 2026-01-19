@@ -1,12 +1,6 @@
 const CACHE_NAME = "bp-guardian-v1";
 
 const STATIC_ASSETS = [
-  "/",
-  "/dashboard",
-  "/badges",
-  "/log",
-  "/insights",
-
   "/static/css/styles.css",
 
   "/static/js/api.js",

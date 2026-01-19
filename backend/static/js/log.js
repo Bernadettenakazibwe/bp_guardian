@@ -15,8 +15,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      await apiRequest("/api/bp", { method: "POST", body: { systolic, diastolic } });
-      showToast("BP saved.", "success");
+      const result = await apiRequest("/api/bp", { method: "POST", body: { systolic, diastolic } });
+      
+      if (result.offline) {
+        showToast("📱 BP saved offline. Will sync when online.", "info");
+      } else {
+        showToast("✓ BP saved.", "success");
+      }
+      
+      // Clear input fields
+      document.getElementById("bpSys").value = "";
+      document.getElementById("bpDia").value = "";
     } catch (e) {
       showToast(`BP save failed: ${e.message}`, "danger");
     }
@@ -27,8 +36,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const note = document.getElementById("moodNote").value.trim() || null;
 
     try {
-      await apiRequest("/api/mood", { method: "POST", body: { mood_level, note } });
-      showToast("Mood saved.", "success");
+      const result = await apiRequest("/api/mood", { method: "POST", body: { mood_level, note } });
+      
+      if (result.offline) {
+        showToast("📱 Mood saved offline. Will sync when online.", "info");
+      } else {
+        showToast("✓ Mood saved.", "success");
+      }
+      
+      // Clear input fields
+      document.getElementById("moodLevel").value = "";
+      document.getElementById("moodNote").value = "";
     } catch (e) {
       showToast(`Mood save failed: ${e.message}`, "danger");
     }
