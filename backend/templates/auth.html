@@ -6,40 +6,21 @@
 <style>
   body {
     background-image: url("{{ url_for('static', filename='images/welcome-bg.jpg') }}");
-    background-size: cover;           
-    background-repeat: no-repeat;     
-    background-position: center;      
-    min-height: 100vh;                
-    background-attachment: fixed;     
-    color: white; 
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
+    background-attachment: fixed;
   }
-
-  
   .overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); 
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
     z-index: 0;
   }
-
-  .row.justify-content-center {
-    position: relative;
-    z-index: 1;
-  }
-
-  
-  .text-center h1,
-  .text-center .text-muted {
-    color: white !important;
-  }
-
-  
-  .footer {
-    color: white;
-  }
+  .row.justify-content-center { position: relative; z-index: 1; }
+  .text-center h1, .text-center .text-muted, .text-center small { color: #fff; }
 </style>
 
 <div class="overlay"></div>
@@ -56,7 +37,6 @@
 
     <div class="card shadow-sm border-0">
       <div class="card-body p-4">
-
         <ul class="nav nav-tabs mb-3" id="authTabs">
           <li class="nav-item">
             <button class="nav-link active" id="tab-login" data-bs-toggle="tab" data-bs-target="#pane-login">Login</button>
@@ -95,16 +75,13 @@
               <input class="form-control" id="regPassword" type="password" placeholder="Create a password">
             </div>
             <button class="btn btn-primary w-100" id="btnRegister" type="button">Register</button>
-            <div class="text-muted small mt-2">
-              After registering, switch back to Login.
-            </div>
+            <div class="text-muted small mt-2">After registering, switch back to Login.</div>
           </div>
         </div>
-
       </div>
     </div>
 
-    <div class="text-center small mt-3 footer">
+    <div class="text-center text-muted small mt-3">
       © 2026 BP Guardian. All rights reserved.
     </div>
   </div>
@@ -114,3 +91,4 @@
 {% block scripts %}
 <script src="/static/js/auth.js"></script>
 {% endblock %}
+

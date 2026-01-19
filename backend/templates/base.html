@@ -10,51 +10,102 @@
 
   <!-- App CSS -->
   <link rel="stylesheet" href="/static/css/styles.css">
+
+  <style>
+    /* Offline overlay & text on bg */
+    .page-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 0;
+    }
+    .text-on-bg {
+      color: #fff !important;
+    }
+    #offlineBanner {
+      display:none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: #b91c1c;
+      color: #fff;
+      text-align: center;
+      padding: 0.35rem 0;
+      z-index: 9999;
+      font-weight: 600;
+    }
+  </style>
+
   {% block head_extra %}{% endblock %}
 </head>
 <body class="bg-light">
 
-  {% block nav %}
-  <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container-fluid">
-      <a class="navbar-brand d-flex align-items-center gap-2" href="/dashboard">
-        <span class="brand-dot"></span>
-        <span>BP Guardian</span>
-      </a>
+<div id="offlineBanner">You are offline. Some features may be unavailable.</div>
+<div class="page-overlay"></div>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+{% block nav %}
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/dashboard">
+      <span class="brand-dot"></span>
+      <span>BP Guardian</span>
+    </a>
 
-      <div class="collapse navbar-collapse" id="navMain">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
-          <li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
-          <li class="nav-item"><a class="nav-link" href="/insights">Insights</a></li>
-          <li class="nav-item"><a class="nav-link" href="/badges">Badges</a></li>
-        </ul>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
 
-        <div class="d-flex align-items-center gap-3">
-          <div class="text-white small" id="navUserLabel">Not logged in</div>
-          <button class="btn btn-outline-light btn-sm" id="btnLogout" type="button">Logout</button>
-        </div>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link" href="/dashboard">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="/log">Log</a></li>
+        <li class="nav-item"><a class="nav-link" href="/insights">Insights</a></li>
+        <li class="nav-item"><a class="nav-link" href="/badges">Badges</a></li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-3">
+        <div class="text-white small" id="navUserLabel">Not logged in</div>
+        <button class="btn btn-outline-light btn-sm" id="btnLogout" type="button">Logout</button>
       </div>
     </div>
-  </nav>
-  {% endblock %}
-
-  <div class="container py-4">
-    <div id="toastArea"></div>
-    {% block content %}{% endblock %}
   </div>
+</nav>
+{% endblock %}
 
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<div class="container py-4">
+  <div id="toastArea"></div>
+  {% block content %}{% endblock %}
+</div>
 
-  <!-- App JS -->
-  <script src="/static/js/api.js"></script>
-  <script src="/static/js/ui.js"></script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  {% block scripts %}{% endblock %}
+<!-- App JS -->
+<script src="/static/js/api.js"></script>
+<script src="/static/js/ui.js"></script>
+
+{% block scripts %}{% endblock %}
+
+<script>
+  // Register Service Worker
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('Service Worker registered'))
+      .catch(err => console.error('SW registration failed:', err));
+    });
+  }
+
+  // Offline banner toggle
+  const offlineBanner = document.getElementById("offlineBanner");
+  function updateOfflineStatus() {
+    offlineBanner.style.display = navigator.onLine ? "none" : "block";
+  }
+  window.addEventListener("online", updateOfflineStatus);
+  window.addEventListener("offline", updateOfflineStatus);
+  updateOfflineStatus();
+</script>
 </body>
 </html>
+

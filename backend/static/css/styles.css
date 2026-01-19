@@ -58,6 +58,18 @@ pre {
   color: white;
 }
 
+.text-on-bg {
+  color: #fff !important;
+}
+
+.page-overlay {
+  z-index: 0;
+}
+
+#offlineBanner {
+  z-index: 9999;
+}
+
 .badge-icon.earned { background: #16a34a; }
 .badge-icon.locked { background: #9ca3af; }
 

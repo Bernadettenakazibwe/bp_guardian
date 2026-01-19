@@ -14,6 +14,7 @@ const STATIC_ASSETS = [
   "/static/js/badges.js",
   "/static/js/log.js",
   "/static/js/insights.js",
+  "/static/js/ui.js",
 
   "/static/images/welcome-bg.jpg",
 ];
@@ -40,7 +41,10 @@ self.addEventListener("fetch", (event) => {
 
   event.respondWith(
     caches.match(event.request).then(cached => {
-      return cached || fetch(event.request);
+      if (cached) return cached;
+      return fetch(event.request).catch(() => {
+        console.log("Offline fallback:", event.request.url);
+      });
     })
   );
 });
