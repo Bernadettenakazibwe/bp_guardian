@@ -1,4 +1,4 @@
-const CACHE_NAME = "bp-guardian-v1";
+const CACHE_NAME = "bp-guardian-v2";
 
 const STATIC_ASSETS = [
   "/static/css/styles.css",
@@ -9,8 +9,18 @@ const STATIC_ASSETS = [
   "/static/js/log.js",
   "/static/js/insights.js",
   "/static/js/ui.js",
+  "/static/js/auth.js",
+  "/static/js/offline-status.js",
+  "/static/js/offline-storage.js",
+  "/static/js/sync.js",
 
   "/static/images/welcome-bg.jpg",
+
+  // Cache HTML pages for offline navigation
+  "/dashboard",
+  "/log",
+  "/insights",
+  "/badges"
 ];
 
 // INSTALL
