@@ -1,5 +1,8 @@
+.DS_Store
+*.zip
 venv/
 __pycache__/
 *.pyc
 instance/bp_guardian.db
 .env
+
