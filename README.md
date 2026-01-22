@@ -226,12 +226,12 @@ The badge and gamification system also functions as intended. Users receive imme
 
 ## Demo Video
 
-To view the demo of the BP Guardian application, watch the video below:
+To view the demo of the BP Guardian application, watch the video below under this link:
 
-<video width="600" controls>
-  <source src="videos\VID_20260121_182145.mp4" type="video/mp4">
-  
-</video>
+
+https://drive.google.com/file/d/1XqA2gk8QHw1qQVaRx-5a_NWw62VuWnDw/view?usp=sharing
+
+
 
 ## System Limitations
 
@@ -250,10 +250,13 @@ Some inconsistencies were observed on Google Chrome, e.g. you can not change bet
 
 Service Worker behavior differs slightly between browsers.
 
-<video width="600" controls>
-  <source src="videos\VID_20260121_185752.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+Please watch this video where I explain the web browser incompatibility problem:
+
+https://drive.google.com/file/d/1XqA2gk8QHw1qQVaRx-5a_NWw62VuWnDw/view?usp=sharing
+
+
+
+
 
 ## How to Access and Run the Project
 
