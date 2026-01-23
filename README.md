@@ -31,7 +31,7 @@
 
 Hypertension (high blood pressure) is one of the most significant and rapidly growing public health challenges in Uganda. Epidemiological research has shown that more than one in four adults in certain regions of the country experience high blood pressure, with an age-standardized prevalence of approximately 27.2% among adults aged 15 years and above (Musinguzi & Nuwaha, 2013). Despite this high prevalence, the proportion of individuals who are aware that they have hypertension remains alarmingly low. In the same community-based survey, only 28.2% of those with hypertension were aware of their condition, and a mere 9.4% had their blood pressure under control (Musinguzi & Nuwaha, 2013). These findings point to an urgent need for continuous monitoring, improved awareness, and better self-management strategies for hypertension, especially given its role as a major risk factor for cardiovascular diseases.
 
-Low awareness and poor control of hypertension are not unique to localized studies but reflect broader patterns seen across sub-Saharan Africa, where undiagnosed and untreated high blood pressure contributes substantially to morbidity and mortality (Uganda Public Health Fellowship Program, 2023). The silent nature of hypertension like often lacking clear symptoms, means many people do not measure their blood pressure until serious complications arise, such as stroke or heart attack. This situation is compounded by limited health infrastructure, long distances to clinics, transport costs, and a lack of accessible self-monitoring tools for rural and low-resource communities.
+Low awareness and poor control of hypertension are not unique to localized studies but reflect broader patterns seen across sub-Saharan Africa, where undiagnosed and untreated high blood pressure contributes substantially to morbidity and mortality. The silent nature of hypertension like often lacking clear symptoms, means many people do not measure their blood pressure until serious complications arise, such as stroke or heart attack. This situation is compounded by limited health infrastructure, long distances to clinics, transport costs, and a lack of accessible self-monitoring tools for rural and low-resource communities.
 
 BP Guardian is developed to directly address these gaps by providing an offline-capable health monitoring application that allows users to consistently record, visualize, and understand their blood pressure trends over time. The application is intentionally designed to function where internet access is intermittent or unavailable, making it particularly suited for rural Ugandan contexts and similar settings across sub-Saharan Africa.
 
@@ -180,6 +180,7 @@ This module controls the dashboard page. It fetches blood pressure and mood data
 
 static/js/log.js
 
+
 This file manages the data entry process for blood pressure and mood logs. It validates input, sends data to the backend via the API layer, and provides immediate user feedback. When offline, it confirms that data has been saved locally.
 
 static/js/insights.js
@@ -224,9 +225,26 @@ Another key strength is the rule-based recommendation engine. By translating blo
 
 The badge and gamification system also functions as intended. Users receive immediate feedback and rewards for consistent logging, which encourages long-term engagement. This feature supports behavior change by making health tracking more motivating and less intimidating.
 
+### Images for the project overview
+
+
+<img width="1920" height="1080" alt="2026-01-06" src="https://github.com/user-attachments/assets/5d6eff19-8bf0-4fe4-b3d5-5f5e2ae86218" />
+
+
+<img width="1920" height="1080" alt="2026-01-06 (6)" src="https://github.com/user-attachments/assets/f7b6cf6a-3e2e-411b-9ff8-187626b410f0" />
+
+
+<img width="1920" height="1080" alt="2026-01-06 (4)" src="https://github.com/user-attachments/assets/b6d6065a-c186-45c2-b383-27e22e885744" />
+
+
+<img width="1920" height="1080" alt="2026-01-21 (1)" src="https://github.com/user-attachments/assets/701e313f-976f-40da-b235-aa6e8e91421b" />
+
+
 ## Demo Video
 
 To view the demo of the BP Guardian application, watch the video below under this link:
+
+
 
 
 https://drive.google.com/file/d/1XqA2gk8QHw1qQVaRx-5a_NWw62VuWnDw/view?usp=sharing
